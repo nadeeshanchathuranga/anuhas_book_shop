@@ -203,8 +203,8 @@ const submit = async () => {
 };
 
 // Optional sound
-const playClickSound = () => {
-  const clickSound = new Audio("/sounds/click-sound.mp3");
-  clickSound.play();
-};
+// const playClickSound = () => {
+//   const clickSound = new Audio("/sounds/click-sound.mp3");
+//   clickSound.play();
+// };
 </script>

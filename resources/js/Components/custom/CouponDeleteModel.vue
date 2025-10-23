@@ -76,10 +76,10 @@ import {
 import { ref } from "vue";
 import { useForm } from "@inertiajs/vue3";
 
-const playClickSound = () => {
-  const clickSound = new Audio("/sounds/click-sound.mp3");
-  clickSound.play();
-};
+// const playClickSound = () => {
+//   const clickSound = new Audio("/sounds/click-sound.mp3");
+//   clickSound.play();
+// };
 
 const emit = defineEmits(["update:open"]);
 

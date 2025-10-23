@@ -201,9 +201,9 @@ const form = useForm({
   ],
 });
 
-const playClickSound = () => {
-  new Audio("/sounds/click-sound.mp3").play();
-};
+// const playClickSound = () => {
+//   new Audio("/sounds/click-sound.mp3").play();
+// };
 
 const handleImageUpload = (event) => {
   form.image = event.target.files[0];

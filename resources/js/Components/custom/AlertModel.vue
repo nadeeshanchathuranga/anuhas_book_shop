@@ -60,10 +60,10 @@ import { useForm } from "@inertiajs/vue3";
 
 const emit = defineEmits(["update:open"]);
 
-const playClickSound = () => {
-  const clickSound = new Audio("/sounds/click-sound.mp3");
-  clickSound.play();
-};
+// const playClickSound = () => {
+//   const clickSound = new Audio("/sounds/click-sound.mp3");
+//   clickSound.play();
+// };
 
 
 const { open } = defineProps({

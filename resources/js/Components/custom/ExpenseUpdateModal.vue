@@ -129,9 +129,9 @@ const props = defineProps({
   updateRouteName: { type: String, default: "expenses.update" },
 });
 
-const playClickSound = () => {
-  try { new Audio("/sounds/click-sound.mp3").play(); } catch {}
-};
+// const playClickSound = () => {
+//   try { new Audio("/sounds/click-sound.mp3").play(); } catch {}
+// };
 
 const form = useForm({
   title: "",
