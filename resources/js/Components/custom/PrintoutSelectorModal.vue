@@ -162,22 +162,6 @@
                     </div>
                   </div>
                 </div>
-
-                <!-- Pagination -->
-                <div v-if="printouts.links && printouts.links.length > 3" class="flex justify-center mt-6 space-x-2">
-                  <button
-                    v-for="(link, index) in printouts.links.slice(1, -1)"
-                    :key="index"
-                    @click="fetchPage(link.url)"
-                    :class="[
-                      'px-3 py-1 rounded border',
-                      link.active
-                        ? 'bg-blue-500 text-white border-blue-500'
-                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                    ]"
-                    v-html="link.label"
-                  ></button>
-                </div>
               </template>
 
               <template v-else>
@@ -247,21 +231,27 @@ const stockFilter = ref('all');
 const priceSort = ref('');
 
 // Methods
-const fetchPrintouts = async (url = '/printouts/api') => {
+const fetchPrintouts = async () => {
   loading.value = true;
+  
   try {
-    const response = await axios.get(url, {
+    const response = await axios.get('/printouts/api', {
       params: {
         search: search.value,
         stock: stockFilter.value,
-        sort: priceSort.value,
-        page: url.includes('page') ? null : 1 // Let the URL handle pagination
+        sort: priceSort.value
       }
     });
-    printouts.value = response.data;
+    
+    if (response.data && response.data.data) {
+      printouts.value = {
+        data: response.data.data,
+        total: response.data.count || 0
+      };
+    }
   } catch (error) {
     console.error('Error fetching printouts:', error);
-    // Show error message to user
+    printouts.value = { data: [], total: 0 };
   } finally {
     loading.value = false;
   }
@@ -270,12 +260,6 @@ const fetchPrintouts = async (url = '/printouts/api') => {
 const performSearch = debounce(() => {
   fetchPrintouts();
 }, 500);
-
-const fetchPage = (url) => {
-  if (url) {
-    fetchPrintouts(url);
-  }
-};
 
 const togglePrintoutSelection = (printout) => {
   if (printout.stock_quantity <= 0) return;

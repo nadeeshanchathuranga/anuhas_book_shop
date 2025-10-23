@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Printout;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class PrintoutController extends Controller
@@ -111,40 +112,42 @@ class PrintoutController extends Controller
         return back()->with('success', 'Stock quantity updated successfully.');
     }
     /**
- * API endpoint for fetching printouts (for POS modal)
- */
-public function apiIndex(Request $request)
-{
-    $query = Printout::query();
+     * API endpoint for fetching printouts (for POS modal)
+     */
+    public function apiIndex(Request $request)
+    {
+        $query = Printout::query();
 
-    // Search
-    if ($request->has('search') && $request->search) {
-        $query->where('title', 'like', '%' . $request->search . '%')
-              ->orWhere('description', 'like', '%' . $request->search . '%');
-    }
-
-    // Stock filter
-    if ($request->has('stock') && $request->stock !== 'all') {
-        if ($request->stock === 'in') {
-            $query->where('stock_quantity', '>', 0);
-        } elseif ($request->stock === 'out') {
-            $query->where('stock_quantity', '<=', 0);
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
         }
-    }
 
-    // Price sort
-    if ($request->has('sort')) {
-        if ($request->sort === 'asc') {
-            $query->orderBy('price', 'asc');
-        } elseif ($request->sort === 'desc') {
-            $query->orderBy('price', 'desc');
+        // Stock filter
+        if ($request->filled('stock') && $request->stock !== 'all') {
+            if ($request->stock === 'in') {
+                $query->where('stock_quantity', '>', 0);
+            } elseif ($request->stock === 'out') {
+                $query->where('stock_quantity', '<=', 0);
+            }
         }
-    } else {
-        $query->latest();
+
+        // Sort by price
+        if ($request->filled('sort')) {
+            $query->orderBy('price', $request->sort);
+        } else {
+            $query->latest();
+        }
+
+        $printouts = $query->get();
+
+        return response()->json([
+            'data' => $printouts,
+            'count' => $printouts->count()
+        ]);
     }
-
-    $printouts = $query->paginate(12);
-
-    return response()->json($printouts);
-}
 }

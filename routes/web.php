@@ -114,9 +114,20 @@ Route::resource('units', UnitController::class);
     Route::resource('credit_payment', CreditController::class);
 
 Route::resource('users', UserController::class); 
-Route::resource('printouts', PrintoutController::class);
-// Add this route for the printouts API
+
+// API route for printouts modal - MUST be before resource route
 Route::get('/printouts/api', [PrintoutController::class, 'apiIndex'])->name('printouts.api');
+
+// Test route to verify API response
+Route::get('/test/printouts', function() {
+    $printouts = \App\Models\Printout::all();
+    return response()->json([
+        'data' => $printouts,
+        'count' => $printouts->count()
+    ]);
+});
+
+Route::resource('printouts', PrintoutController::class);
 
 });
 
