@@ -97,6 +97,15 @@
                 </button>
 
                 <button
+                  @click="fetchPrintouts"
+                  class="flex items-center px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 transition text-white text-xl font-semibold"
+                  title="Fetch all added printouts"
+                >
+                  <i class="ri-add-circle-fill mr-2"></i>
+                  Fetch Printouts
+                </button>
+
+                <button
                   @click="openExpenseCreate"
                   class="flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition text-white text-xl font-semibold"
                   title="Add a new expense"

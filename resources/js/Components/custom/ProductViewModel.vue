@@ -192,10 +192,10 @@ import { HasRole } from "@/Utils/Permissions";
 
 dayjs.extend(advancedFormat);
 
-// const playClickSound = () => {
-//   const clickSound = new Audio("/sounds/click-sound.mp3");
-//   clickSound.play();
-// };
+const playClickSound = () => {
+  const clickSound = new Audio("/sounds/click-sound.mp3");
+  clickSound.play();
+};
 
 const emit = defineEmits(["update:open"]);
 

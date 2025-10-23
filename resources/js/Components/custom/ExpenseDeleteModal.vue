@@ -90,9 +90,9 @@ const props = defineProps({
 const form = useForm({});
 const errorMsg = ref("");
 
-// const playClickSound = () => {
-//   try { new Audio("/sounds/click-sound.mp3").play(); } catch {}
-// };
+const playClickSound = () => {
+  try { new Audio("/sounds/click-sound.mp3").play(); } catch {}
+};
 
 // Build the URL: prefer route() if available, else fallback to REST
 const destroyUrl = computed(() => {

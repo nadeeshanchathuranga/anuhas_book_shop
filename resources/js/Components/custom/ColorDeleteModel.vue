@@ -61,10 +61,10 @@ const { open, expense } = defineProps({
   expense: { type: Object, default: null }
 });
 
-// const playClickSound = () => {
-//   const clickSound = new Audio('/sounds/click-sound.mp3');
-//   clickSound.play();
-// };
+const playClickSound = () => {
+  const clickSound = new Audio('/sounds/click-sound.mp3');
+  clickSound.play();
+};
 
 const form = useForm({});
 

@@ -24,8 +24,11 @@ use App\Http\Controllers\ExpenseNewController;
 use App\Http\Controllers\CreditController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PrintoutController;
+
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
+
 
 Route::get('/dashboard', function () {
     return Inertia::location(route('dashboard'));
@@ -111,6 +114,7 @@ Route::resource('units', UnitController::class);
     Route::resource('credit_payment', CreditController::class);
 
 Route::resource('users', UserController::class); 
+Route::resource('printouts', PrintoutController::class);
 
 
 });

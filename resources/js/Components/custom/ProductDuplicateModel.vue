@@ -585,10 +585,10 @@
    const isPharma = computed(() => import.meta.env.VITE_APP_NAME === "pharma");
 
    // Play click sound function
-   // const playClickSound = () => {
-   //   const clickSound = new Audio("/sounds/click-sound.mp3");
-   //   clickSound.play();
-   // };
+   const playClickSound = () => {
+     const clickSound = new Audio("/sounds/click-sound.mp3");
+     clickSound.play();
+   };
 
    // Define props
    const { open, categories, colors, suppliers, sizes, selectedProduct } =
