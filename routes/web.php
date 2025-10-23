@@ -115,7 +115,8 @@ Route::resource('units', UnitController::class);
 
 Route::resource('users', UserController::class); 
 Route::resource('printouts', PrintoutController::class);
-
+// Add this route for the printouts API
+Route::get('/printouts/api', [PrintoutController::class, 'apiIndex'])->name('printouts.api');
 
 });
 

@@ -912,6 +912,7 @@ import CurrencyInput from "@/Components/custom/CurrencyInput.vue";
 import SelectProductModel from "@/Components/custom/SelectProductModel.vue";
 import ExpenseCreateModal from "@/Components/custom/ExpenseCreateModal.vue";
 import ServiceQuickModal from "@/Components/custom/ServiceQuickModal.vue";
+import PrintoutSelectorModal from '@/Components/custom/PrintoutSelectorModal.vue';
 
 import { generateOrderId } from "@/Utils/Other.js";
 
@@ -980,6 +981,8 @@ const isServiceModalOpen = ref(false);
 const showBatchSelection = ref(false);
 const availableBatches = ref([]);
 const pendingBarcode = ref("");
+
+const isPrintoutModalOpen = ref(false);
 
 const onServiceSaved = (data) => {
   isAlertModalOpen.value = true;
@@ -1809,6 +1812,36 @@ const handleServicesSelected = (selected) => {
       services.value.push({ ...service, quantity: 1, isEditing: false });
     }
   });
+};
+
+// Add this method to handle printout selection
+const handlePrintoutsSelected = (selectedPrintouts) => {
+  selectedPrintouts.forEach(printout => {
+    const existing = products.value.find(item => item.id === printout.id && item.type === 'printout');
+    
+    if (existing) {
+      existing.quantity += printout.quantity;
+    } else {
+      products.value.push({
+        ...printout,
+        type: 'printout',
+        name: printout.title,
+        selling_price: printout.price,
+        quantity: printout.quantity || 1,
+        apply_discount: false,
+        // Add any other required fields for POS system
+      });
+    }
+  });
+  
+  // Show success message
+  isAlertModalOpen.value = true;
+  message.value = `Added ${selectedPrintouts.length} printout(s) to sale`;
+};
+
+// Update the fetchPrintouts method
+const fetchPrintouts = () => {
+  isPrintoutModalOpen.value = true;
 };
 
 // Refs for modal + fields

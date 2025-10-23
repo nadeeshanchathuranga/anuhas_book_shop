@@ -110,4 +110,41 @@ class PrintoutController extends Controller
 
         return back()->with('success', 'Stock quantity updated successfully.');
     }
+    /**
+ * API endpoint for fetching printouts (for POS modal)
+ */
+public function apiIndex(Request $request)
+{
+    $query = Printout::query();
+
+    // Search
+    if ($request->has('search') && $request->search) {
+        $query->where('title', 'like', '%' . $request->search . '%')
+              ->orWhere('description', 'like', '%' . $request->search . '%');
+    }
+
+    // Stock filter
+    if ($request->has('stock') && $request->stock !== 'all') {
+        if ($request->stock === 'in') {
+            $query->where('stock_quantity', '>', 0);
+        } elseif ($request->stock === 'out') {
+            $query->where('stock_quantity', '<=', 0);
+        }
+    }
+
+    // Price sort
+    if ($request->has('sort')) {
+        if ($request->sort === 'asc') {
+            $query->orderBy('price', 'asc');
+        } elseif ($request->sort === 'desc') {
+            $query->orderBy('price', 'desc');
+        }
+    } else {
+        $query->latest();
+    }
+
+    $printouts = $query->paginate(12);
+
+    return response()->json($printouts);
+}
 }
