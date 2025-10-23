@@ -1,5 +1,4 @@
 <template>
-  <!-- Removed AdminLayout wrapper -->
   <Head title="Printouts" />
   <Banner />
   <div class="flex flex-col items-center justify-start min-h-screen py-8 space-y-8 bg-gray-100 md:px-36 px-16">
@@ -49,11 +48,9 @@
           >
             <div class="px-2 py-4 space-y-4">
               <div class="w-full text-[11px] font-bold tracking-wide space-y-2 p-3 rounded-lg">
-                <!-- Printout Name Centered -->
                 <p class="text-center text-white text-[13px] font-semibold">
                   {{ printout.title || "N/A" }}
                 </p>
-                <!-- Price -->
                 <div class="flex justify-center items-center text-white text-[12px]">
                   <div class="bg-blue-600 px-3 py-1 rounded-full">
                     Price: Rs. {{ printout.price || "0.00" }}
@@ -166,7 +163,6 @@
 </template>
 
 <script setup>
-// Removed AdminLayout import
 import { ref, computed } from 'vue';
 import { Head, Link, router } from "@inertiajs/vue3";
 import { debounce } from "lodash";
@@ -174,8 +170,8 @@ import Header from "@/Components/custom/Header.vue";
 import Footer from "@/Components/custom/Footer.vue";
 import Banner from "@/Components/Banner.vue";
 import PrintoutCreateModel from "@/Components/custom/PrintoutCreateModel.vue";
-// import PrintoutUpdateModel from "@/Components/custom/PrintoutUpdateModel.vue";
-// import PrintoutDeleteModel from "@/Components/custom/PrintoutDeleteModel.vue";
+import PrintoutUpdateModel from "@/Components/custom/PrintoutUpdateModel.vue";
+import PrintoutDeleteModel from "@/Components/custom/PrintoutDeleteModel.vue";
 
 const props = defineProps({
   printouts: Object,
