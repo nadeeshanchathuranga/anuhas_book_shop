@@ -9,6 +9,7 @@ use App\Models\Coupon;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Printout;
+use App\Models\CustomProduct;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\ReturnItem;
@@ -237,8 +238,10 @@ public function submit(Request $request)
     // ---- VALIDATION ----
     $validated = $request->validate([
         'products' => 'required|array|min:1',
-        'products.*.id' => 'required|integer',
-        'products.*.type' => 'nullable|string|in:product,printout',
+        'products.*.id' => 'nullable|integer',
+        'products.*.type' => 'nullable|string|in:product,printout,custom',
+        'products.*.name' => 'required_if:products.*.type,custom|string|max:255',
+        'products.*.price' => 'required_if:products.*.type,custom|numeric|min:0',
         'products.*.quantity' => 'required|numeric|min:0.01',
         // Optional/overrides coming from UI
         'products.*.unit_price' => 'nullable|numeric|min:0',
@@ -298,7 +301,23 @@ public function submit(Request $request)
     foreach ($products as &$p) {
         $itemType = $p['type'] ?? 'product';
         
-        if ($itemType === 'printout') {
+        if ($itemType === 'custom') {
+            // Handle custom product items (no stock check, no existing record)
+            $qty = (float)($p['quantity'] ?? 0);
+            
+            // Use the price provided from frontend
+            $unitPrice = (float)($p['price'] ?? 0);
+            $costPrice = 0; // Custom products don't have cost price
+            
+            $p['__resolved_unit_price'] = $unitPrice;
+            $p['__resolved_cost_price'] = $costPrice;
+            $p['__is_custom'] = true;
+            $p['__custom_name'] = $p['name'] ?? 'Custom Product';
+            
+            $totalAmount += $qty * $unitPrice;
+            $totalCost   += $qty * $costPrice;
+            
+        } elseif ($itemType === 'printout') {
             // Handle printout items
             $printoutModel = Printout::find($p['id']);
             if (!$printoutModel) {
@@ -465,13 +484,33 @@ public function submit(Request $request)
             $qty = (float)$p['quantity'];
             $unitPrice = (float)$p['__resolved_unit_price'];
             
-            if ($itemType === 'printout') {
+            if ($itemType === 'custom') {
+                // Handle custom product sale item
+                // First, create the custom product record
+                $customProduct = CustomProduct::create([
+                    'name' => $p['__custom_name'],
+                    'price' => $unitPrice,
+                ]);
+                
+                SaleItem::create([
+                    'sale_id'           => $sale->id,
+                    'product_id'        => null,
+                    'printout_id'       => null,
+                    'custom_product_id' => $customProduct->id,
+                    'quantity'          => $qty,
+                    'unit_price'        => $unitPrice,
+                    'total_price'       => $qty * $unitPrice,
+                ]);
+                
+                // No stock to decrement for custom products
+                
+            } elseif ($itemType === 'printout') {
                 // Handle printout sale item
                 $printoutModel = $p['__model'];
                 
                 SaleItem::create([
                     'sale_id'     => $sale->id,
-                    'product_id'  => null, // No product_id for printouts
+                    'product_id'  => null,
                     'printout_id' => $printoutModel->id,
                     'quantity'    => $qty,
                     'unit_price'  => $unitPrice,

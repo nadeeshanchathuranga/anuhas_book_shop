@@ -87,6 +87,16 @@
 
               <!-- Right -->
               <div class="flex flex-wrap items-center gap-3 justify-end w-full md:w-auto">
+                
+                <button
+                  @click="openCustomProductModal"
+                  class="flex items-center px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 transition text-white text-xl font-semibold"
+                  title="Add custom product"
+                >
+                  <i class="ri-add-circle-fill mr-2"></i>
+                  Add Custom Product
+                </button>
+
                 <button
                   @click="isServiceModalOpen = true"
                   class="flex items-center px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 transition text-white text-xl font-semibold"
@@ -669,6 +679,97 @@
       @saved="onServiceSaved"
     />
 
+    <!-- Custom Product Modal -->
+    <TransitionRoot as="template" :show="isCustomProductModalOpen">
+      <Dialog class="relative z-50" @close="closeCustomProductModal">
+        <TransitionChild
+          as="template"
+          enter="ease-out duration-300"
+          enter-from="opacity-0"
+          enter-to="opacity-100"
+          leave="ease-in duration-200"
+          leave-from="opacity-100"
+          leave-to="opacity-0"
+        >
+          <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-4">
+            <TransitionChild
+              as="template"
+              enter="ease-out duration-300"
+              enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95"
+            >
+              <DialogPanel class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                <div>
+                  <div class="text-center">
+                    <DialogTitle as="h3" class="text-2xl font-bold leading-6 text-gray-900 mb-6">
+                      Add Custom Product
+                    </DialogTitle>
+                    <div class="mt-4 space-y-4">
+                      <div class="text-left">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+                        <input
+                          v-model="customProduct.name"
+                          type="text"
+                          placeholder="Enter product name"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        />
+                      </div>
+                      
+                      <div class="text-left">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Price (LKR)</label>
+                        <input
+                          v-model="customProduct.price"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="Enter price"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        />
+                      </div>
+                      
+                      <div class="text-left">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                        <input
+                          v-model="customProduct.quantity"
+                          type="number"
+                          min="1"
+                          placeholder="Enter quantity"
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-6 flex gap-3">
+                  <button
+                    type="button"
+                    class="flex-1 inline-flex justify-center rounded-lg bg-purple-600 px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-purple-700 focus:outline-none"
+                    @click="addCustomProduct"
+                  >
+                    Add to Cart
+                  </button>
+                  <button
+                    type="button"
+                    class="flex-1 inline-flex justify-center rounded-lg bg-gray-200 px-4 py-3 text-base font-semibold text-gray-700 shadow-sm hover:bg-gray-300 focus:outline-none"
+                    @click="closeCustomProductModal"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </div>
+      </Dialog>
+    </TransitionRoot>
+
     <AlertModel v-model:open="isAlertModalOpen" :message="message" />
 
     <SelectProductModel
@@ -911,6 +1012,7 @@
 import { Head, Link, useForm, router } from "@inertiajs/vue3";
 import { ref, onMounted, computed, watch, onUnmounted, nextTick , onBeforeUnmount } from "vue";
 import axios from "axios";
+import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
 
 import PosSuccessModel from "@/Components/custom/PosSuccessModel.vue";
 import AlertModel from "@/Components/custom/AlertModel.vue";
@@ -982,6 +1084,14 @@ const asideRef = ref(null);
 
 const isCreateModalOpen = ref(false);
 const isServiceModalOpen = ref(false);
+const isCustomProductModalOpen = ref(false);
+
+// Custom product form data
+const customProduct = ref({
+  name: '',
+  price: '',
+  quantity: 1
+});
 
 // Batch selection variables
 const showBatchSelection = ref(false);
@@ -1003,6 +1113,44 @@ const openExpenseCreate = () => {
   if (!("HasRole" in globalThis) || isAdmin.value) isCreateModalOpen.value = true;
 };
 
+// Custom Product Functions
+const openCustomProductModal = () => {
+  customProduct.value = {
+    name: '',
+    price: '',
+    quantity: 1
+  };
+  isCustomProductModalOpen.value = true;
+};
+
+const closeCustomProductModal = () => {
+  isCustomProductModalOpen.value = false;
+  customProduct.value = {
+    name: '',
+    price: '',
+    quantity: 1
+  };
+};
+
+const addCustomProduct = () => {
+  if (!customProduct.value.name || !customProduct.value.price || customProduct.value.quantity <= 0) {
+    alert('Please fill in all fields with valid values');
+    return;
+  }
+
+  const customItem = {
+    id: Date.now(), // Temporary ID for frontend
+    type: 'custom',
+    name: customProduct.value.name,
+    price: parseFloat(customProduct.value.price),
+    quantity: parseInt(customProduct.value.quantity),
+    selling_price: parseFloat(customProduct.value.price),
+    apply_discount: false
+  };
+
+  products.value.push(customItem);
+  closeCustomProductModal();
+};
 
 
 const removeItem = (index) => {
@@ -1943,8 +2091,8 @@ watch(
 );
 
 // Refocus back to barcode when all modals are closed
-watch([isSelectModalOpen, isModalOpen, isCreateModalOpen, isServiceModalOpen, isSuccessModalOpen, showBatchSelection], ([a,b,c,d,e,f]) => {
-  if (!a && !b && !c && !d && !e && !f) focusBarcodeField();
+watch([isSelectModalOpen, isModalOpen, isCreateModalOpen, isServiceModalOpen, isCustomProductModalOpen, isSuccessModalOpen, showBatchSelection], ([a,b,c,d,e,f,g]) => {
+  if (!a && !b && !c && !d && !e && !f && !g) focusBarcodeField();
 });
 
 watch(isReturnBill, (newVal) => {
