@@ -898,6 +898,12 @@
       </div>
     </template>
     <!-- /Customer/Orders Modal -->
+
+    <PrintoutSelectorModal
+      :open="isPrintoutModalOpen"
+      @update:open="isPrintoutModalOpen = $event"
+      @selected-printouts="handlePrintoutsSelected"
+    />
   </div>
 </template>
 

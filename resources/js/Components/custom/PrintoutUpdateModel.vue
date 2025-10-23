@@ -92,7 +92,8 @@
 </template>
 
 <script setup>
-import { useForm, watch } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
+import { watch } from 'vue';
 
 const props = defineProps({
   open: Boolean,
