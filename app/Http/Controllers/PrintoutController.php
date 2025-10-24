@@ -36,14 +36,12 @@ class PrintoutController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
-            'stock_quantity' => 'required|integer|min:0',
-            'default_quantity' => 'required|integer|min:1',
+            'quantity' => 'required|integer|min:1',
         ]);
 
-        Printout::create($request->all());
+        Printout::create($request->only(['name', 'price', 'quantity']));
 
         return redirect()->route('printouts.index')->with('success', 'Printout created successfully.');
     }
@@ -74,14 +72,12 @@ class PrintoutController extends Controller
     public function update(Request $request, Printout $printout)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
-            'stock_quantity' => 'required|integer|min:0',
-            'default_quantity' => 'required|integer|min:1',
+            'quantity' => 'required|integer|min:1',
         ]);
 
-        $printout->update($request->all());
+        $printout->update($request->only(['name', 'price', 'quantity']));
 
         return redirect()->route('printouts.index')->with('success', 'Printout updated successfully.');
     }

@@ -109,7 +109,7 @@
                       'border-2 rounded-lg p-4 cursor-pointer transition-all duration-200',
                       isPrintoutSelected(printout.id)
                         ? 'border-blue-500 bg-blue-50 shadow-md'
-                        : printout.stock_quantity > 0
+                        : printout.quantity > 0
                         ? 'border-gray-300 hover:border-blue-300 hover:shadow'
                         : 'border-red-300 bg-red-50 cursor-not-allowed'
                     ]"
@@ -124,18 +124,18 @@
                         <span
                           :class="[
                             'px-2 py-1 rounded-full text-xs font-semibold',
-                            printout.stock_quantity > 0
+                            printout.quantity > 0
                               ? 'bg-green-100 text-green-800'
                               : 'bg-red-100 text-red-800'
                           ]"
                         >
-                          {{ printout.stock_quantity > 0 ? 'In Stock' : 'Out of Stock' }}
+                          {{ printout.quantity > 0 ? 'In Stock' : 'Out of Stock' }}
                         </span>
                       </div>
 
                       <!-- Description -->
-                      <p class="text-gray-600 text-sm line-clamp-2">
-                        {{ printout.description || 'No description' }}
+                      <p class="text-black-600  line-clamp-2">
+                        {{ printout.name || 'No name' }}
                       </p>
 
                       <!-- Price and Stock -->
@@ -144,15 +144,11 @@
                           Rs. {{ printout.price }}
                         </span>
                         <span class="text-sm text-gray-500">
-                          Stock: {{ printout.stock_quantity }}
+                          Stock: {{ printout.quantity }}
                         </span>
                       </div>
 
-                      <!-- Default Quantity -->
-                      <div class="text-sm text-gray-500">
-                        Default Qty: {{ printout.default_quantity }}
-                      </div>
-
+                    
                       <!-- Selection Indicator -->
                       <div v-if="isPrintoutSelected(printout.id)" class="flex items-center justify-center mt-2">
                         <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
@@ -262,13 +258,16 @@ const performSearch = debounce(() => {
 }, 500);
 
 const togglePrintoutSelection = (printout) => {
-  if (printout.stock_quantity <= 0) return;
+  if (printout.quantity <= 0) {
+    alert(`Printout '${printout.title}' is out of stock and cannot be selected.`);
+    return;
+  }
 
   const index = selectedPrintouts.value.findIndex(p => p.id === printout.id);
   if (index === -1) {
     selectedPrintouts.value.push({
       ...printout,
-      quantity: printout.default_quantity || 1
+      quantity: 1 // Default quantity for selection
     });
   } else {
     selectedPrintouts.value.splice(index, 1);
@@ -309,6 +308,7 @@ watch(() => props.open, (newVal) => {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  line-clamp: 2; /* Standard property for compatibility */
   overflow: hidden;
 }
 </style>

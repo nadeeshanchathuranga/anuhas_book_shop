@@ -49,7 +49,7 @@
             <div class="px-2 py-4 space-y-4">
               <div class="w-full text-[11px] font-bold tracking-wide space-y-2 p-3 rounded-lg">
                 <p class="text-center text-white text-[13px] font-semibold">
-                  {{ printout.title || "N/A" }}
+                  {{ printout.name || "N/A" }}
                 </p>
                 <div class="flex justify-center items-center text-white text-[12px]">
                   <div class="bg-blue-600 px-3 py-1 rounded-full">
@@ -60,23 +60,23 @@
               
               <div class="flex justify-center space-x-2 items-start w-full">
                 <div class="flex space-x-1 text-gray-400">
-                  <p class="font-bold">Default Qty:</p>
-                  <p>{{ printout.default_quantity || "1" }}</p>
+                  <p class="font-bold">Qty:</p>
+                  <p>{{ printout.quantity || "1" }}</p>
                 </div>
               </div>
               
-              <div class="flex items-center justify-center w-full space-x-4">
+              <!-- <div class="flex items-center justify-center w-full space-x-4">
                 <p class="flex items-center space-x-2 text-justify text-gray-400">
                   Description: <b> &nbsp; {{ printout.description || "N/A" }} </b>
                 </p>
-              </div>
+              </div> -->
               
               <div class="flex items-center justify-between">
                 <p
-                  v-if="printout.stock_quantity > 0"
+                  v-if="printout.quantity > 0"
                   class="text-xl font-bold tracking-wider text-green-500"
                 >
-                  <i class="ri-checkbox-blank-circle-fill"></i> In Stock ({{ printout.stock_quantity }})
+                  <i class="ri-checkbox-blank-circle-fill"></i> In Stock ({{ printout.quantity }})
                 </p>
                 <p v-else class="text-xl font-bold tracking-wider text-red-500">
                   <i class="ri-checkbox-blank-circle-fill"></i> Out of Stock

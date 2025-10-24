@@ -425,7 +425,7 @@ public function fetchProducts(Request $request)
 
             if ($request->hasFile('certificate')) {
                 $certificatePath = $request->file('certificate')->store('certificates', 'public');
-                $product->certificate_path = $certificatePath;
+                $validated['certificate_path'] = $certificatePath;
             }
 
 

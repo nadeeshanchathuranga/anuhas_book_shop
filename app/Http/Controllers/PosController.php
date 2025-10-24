@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class PosController extends Controller
 {
@@ -33,7 +34,7 @@ class PosController extends Controller
         }
 
         $allcategories = Category::with('parent')->get()->map(function ($category) {
-            $category->hierarchy_string = $category->hierarchy_string; // Access it
+            $category->hierarchy_string = $category->name; // Corrected assignment
             return $category;
         });
         $sales = Sale::with('customer','employee')->get();
@@ -327,9 +328,9 @@ public function submit(Request $request)
             $qty = (float)($p['quantity'] ?? 0);
 
             // Stock availability for printouts
-            if ($printoutModel->stock_quantity < $qty) {
+            if ($printoutModel->quantity < $qty) {
                 return response()->json([
-                    'message' => "Insufficient stock for {$printoutModel->title}. Available: {$printoutModel->stock_quantity}, Requested: {$qty}"
+                    'message' => "Insufficient stock for {$printoutModel->title}. Available: {$printoutModel->quantity}, Requested: {$qty}"
                 ], 423);
             }
 
@@ -343,6 +344,7 @@ public function submit(Request $request)
             $p['__resolved_unit_price'] = $unitPrice;
             $p['__resolved_cost_price'] = $costPrice;
             $p['__model'] = $printoutModel;
+            $p['name'] = $printoutModel->name; // Include printout name
 
             $totalAmount += $qty * $unitPrice;
             $totalCost   += $qty * $costPrice;
@@ -518,7 +520,7 @@ public function submit(Request $request)
                 ]);
 
                 // Decrease printout stock
-                $printoutModel->decrement('stock_quantity', $qty);
+                $printoutModel->decrement('quantity', $qty);
             } else {
                 // Handle regular product sale item
                 $productModel = $p['__model'];

@@ -10,11 +10,9 @@ class Printout extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title',
-        'description',
         'price',
-        'stock_quantity',
-        'default_quantity',
+        'quantity',
+        'name',
     ];
 
     protected $casts = [

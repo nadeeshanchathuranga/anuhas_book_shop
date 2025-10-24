@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Create the table
         Schema::create('printouts', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('description')->nullable();
-            $table->decimal('price', 10, 2)->default(0.00);
-            $table->integer('stock_quantity')->default(0);
-            $table->integer('default_quantity')->default(1);
+            $table->string('name'); // Added name column
+            $table->decimal('price', 8, 2);
+            $table->integer('quantity')->default(1);
             $table->timestamps();
         });
     }

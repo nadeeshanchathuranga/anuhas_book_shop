@@ -1526,6 +1526,8 @@ const submitBarcode = async () => {
     const response = await axios.post(route("pos.getProduct"), { barcode: form.barcode });
     const { product: fetchedProduct, batches: fetchedBatches, error: fetchedError } = response.data;
 
+    console.log('Fetched Product:', fetchedProduct); // Debugging line
+
     if (fetchedBatches && fetchedBatches.length > 1) {
       // Show batch selection modal
       pendingBarcode.value = form.barcode;
@@ -1970,22 +1972,17 @@ const handleServicesSelected = (selected) => {
 
 // Add this method to handle printout selection
 const handlePrintoutsSelected = (selectedPrintouts) => {
-  selectedPrintouts.forEach(printout => {
-    const existing = products.value.find(item => item.id === printout.id && item.type === 'printout');
-    
-    if (existing) {
-      existing.quantity += printout.quantity;
-    } else {
-      products.value.push({
-        ...printout,
-        type: 'printout',
-        name: printout.title,
-        selling_price: printout.price,
-        quantity: printout.quantity || 1,
-        apply_discount: false,
-        // Add any other required fields for POS system
-      });
-    }
+  selectedPrintouts.forEach((printout) => {
+    const printoutItem = {
+      id: printout.id,
+      type: 'printout',
+      name: printout.name || 'Unnamed Printout',
+      price: parseFloat(printout.price),
+           quantity: parseInt(printout.quantity),
+      selling_price: parseFloat(printout.price),
+      apply_discount: false
+    };
+    products.value.push(printoutItem);
   });
   
   // Show success message
