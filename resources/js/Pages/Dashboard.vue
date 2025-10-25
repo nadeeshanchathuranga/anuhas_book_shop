@@ -60,10 +60,10 @@
       </Link>
 
       <Link href="/printouts" v-if="HasRole(['Admin', 'Manager'])">
-      <div class="dashboard-card bg-[#C62E2E]">
+      <div class="dashboard-card bg-[#af50eb]">
         <div class="card-content">
           <div class="icon-container">
-            <img src="/images/dashboard/products.png" class="icon" alt="jaan-pos" />
+            <img src="/images/dashboard/printout.png" class="icon" alt="jaan-pos" />
           </div>
           <div class="text-container">
             <p class="title">Printouts</p>
