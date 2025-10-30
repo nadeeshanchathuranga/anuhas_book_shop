@@ -38,10 +38,9 @@ class PrintoutController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:1',
         ]);
 
-        Printout::create($request->only(['name', 'price', 'quantity']));
+        Printout::create($request->only(['name', 'price']));
 
         return redirect()->route('printouts.index')->with('success', 'Printout created successfully.');
     }
@@ -74,10 +73,9 @@ class PrintoutController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:1',
         ]);
 
-        $printout->update($request->only(['name', 'price', 'quantity']));
+        $printout->update($request->only(['name', 'price']));
 
         return redirect()->route('printouts.index')->with('success', 'Printout updated successfully.');
     }

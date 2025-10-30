@@ -30,19 +30,6 @@
           <span v-if="form.errors.price" class="text-sm text-red-500">{{ form.errors.price }}</span>
         </div>
 
-        <!-- Quantity Input -->
-        <div>
-          <label for="edit_quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
-          <input
-            v-model="form.quantity"
-            type="number"
-            id="edit_quantity"
-            required
-            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
-          />
-          <span v-if="form.errors.quantity" class="text-sm text-red-500">{{ form.errors.quantity }}</span>
-        </div>
-
         <!-- Action Buttons -->
         <div class="flex justify-end space-x-3">
           <button
@@ -79,7 +66,6 @@ const emit = defineEmits(['update:open']);
 const form = useForm({
   name: '',
   price: 0.00,
-  quantity: 1,
 });
 
 // Watch for selectedPrintout changes and update form
@@ -87,7 +73,6 @@ watch(() => props.selectedPrintout, (newPrintout) => {
   if (newPrintout) {
     form.name = newPrintout.name;
     form.price = newPrintout.price;
-    form.quantity = newPrintout.quantity;
   }
 }, { immediate: true });
 
