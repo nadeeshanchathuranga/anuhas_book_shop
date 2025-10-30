@@ -30,19 +30,6 @@
           <span v-if="form.errors.price" class="text-sm text-red-500">{{ form.errors.price }}</span>
         </div>
 
-        <!-- Quantity Input -->
-        <div>
-          <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
-          <input
-            v-model="form.quantity"
-            type="number"
-            id="quantity"
-            required
-            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
-          />
-          <span v-if="form.errors.quantity" class="text-sm text-red-500">{{ form.errors.quantity }}</span>
-        </div>
-
         <div class="flex justify-end">
           <button
             type="button"
@@ -75,7 +62,6 @@ const emit = defineEmits(['update:open']);
 const form = useForm({
   name: '',
   price: 0.00,
-  quantity: 1,
 });
 
 const submit = () => {

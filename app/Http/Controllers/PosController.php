@@ -327,12 +327,8 @@ public function submit(Request $request)
 
             $qty = (float)($p['quantity'] ?? 0);
 
-            // Stock availability for printouts
-            if ($printoutModel->quantity < $qty) {
-                return response()->json([
-                    'message' => "Insufficient stock for {$printoutModel->title}. Available: {$printoutModel->quantity}, Requested: {$qty}"
-                ], 423);
-            }
+            // Stock availability for printouts - UNLIMITED (no check)
+            // Printouts have unlimited stock, no validation needed
 
             // Use printout price
             $unitPrice = isset($p['unit_price']) && $p['unit_price'] > 0
@@ -519,8 +515,8 @@ public function submit(Request $request)
                     'total_price' => $qty * $unitPrice,
                 ]);
 
-                // Decrease printout stock
-                $printoutModel->decrement('quantity', $qty);
+                // Printout stock is unlimited - no decrement needed
+                // $printoutModel->decrement('quantity', $qty);
             } else {
                 // Handle regular product sale item
                 $productModel = $p['__model'];

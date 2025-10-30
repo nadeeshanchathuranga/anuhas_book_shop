@@ -109,9 +109,7 @@
                       'border-2 rounded-lg p-4 cursor-pointer transition-all duration-200',
                       isPrintoutSelected(printout.id)
                         ? 'border-blue-500 bg-blue-50 shadow-md'
-                        : printout.quantity > 0
-                        ? 'border-gray-300 hover:border-blue-300 hover:shadow'
-                        : 'border-red-300 bg-red-50 cursor-not-allowed'
+                        : 'border-gray-300 hover:border-blue-300 hover:shadow'
                     ]"
                   >
                     <!-- Printout Card -->
@@ -122,14 +120,9 @@
                           {{ printout.title }}
                         </h3>
                         <span
-                          :class="[
-                            'px-2 py-1 rounded-full text-xs font-semibold',
-                            printout.quantity > 0
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          ]"
+                          class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800"
                         >
-                          {{ printout.quantity > 0 ? 'In Stock' : 'Out of Stock' }}
+                          Unlimited Stock
                         </span>
                       </div>
 
@@ -143,8 +136,8 @@
                         <span class="text-lg font-bold text-blue-600">
                           Rs. {{ printout.price }}
                         </span>
-                        <span class="text-sm text-gray-500">
-                          Stock: {{ printout.quantity }}
+                        <span class="text-sm text-green-600 font-semibold">
+                          ∞ Unlimited
                         </span>
                       </div>
 
@@ -258,10 +251,11 @@ const performSearch = debounce(() => {
 }, 500);
 
 const togglePrintoutSelection = (printout) => {
-  if (printout.quantity <= 0) {
-    alert(`Printout '${printout.title}' is out of stock and cannot be selected.`);
-    return;
-  }
+  // Printouts have unlimited stock - no validation needed
+  // if (printout.quantity <= 0) {
+  //   alert(`Printout '${printout.title}' is out of stock and cannot be selected.`);
+  //   return;
+  // }
 
   const index = selectedPrintouts.value.findIndex(p => p.id === printout.id);
   if (index === -1) {

@@ -1985,9 +1985,9 @@ const handlePrintoutsSelected = (selectedPrintouts) => {
     products.value.push(printoutItem);
   });
   
-  // Show success message
-  isAlertModalOpen.value = true;
-  message.value = `Added ${selectedPrintouts.length} printout(s) to sale`;
+  // Show success message - REMOVED
+  // isAlertModalOpen.value = true;
+  // message.value = `Added ${selectedPrintouts.length} printout(s) to sale`;
 };
 
 // Update the fetchPrintouts method

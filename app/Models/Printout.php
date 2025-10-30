@@ -11,7 +11,6 @@ class Printout extends Model
 
     protected $fillable = [
         'price',
-        'quantity',
         'name',
     ];
 

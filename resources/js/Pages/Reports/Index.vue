@@ -295,25 +295,34 @@
     <div class="w-full bg-white border-4 border-black rounded-xl p-6">
       <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">Top Products Stock Table</h2>
 
-      <div class="flex justify-between items-center pb-4">
-        <div class="flex gap-4">
+      <div class="flex justify-between items-center pb-4 gap-4">
+        <div class="flex gap-4 items-center">
           <button @click="downloadStockTablePDF" class="px-4 py-2 text-md font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 shadow-md">
             Download PDF
           </button>
+          <div class="relative">
+            <input
+              v-model="productSearchQuery"
+              type="text"
+              placeholder="Search products..."
+              class="px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 w-64"
+            />
+            <i class="ri-search-line absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
         </div>
 
         <div class="flex items-center gap-3">
           <div class="py-2 px-4 border-2 border-green-600 rounded-xl bg-green-100 shadow-sm text-center">
             <p class="text-sm font-extrabold text-black uppercase">
-              Total Sales Qty:
-              <span class="text-base font-bold">{{ totalSalesQty.toLocaleString() }}</span>
+              Total Products:
+              <span class="text-base font-bold">{{ totalProductCount.toLocaleString() }}</span>
             </p>
           </div>
           <div class="py-2 px-4 border-2 border-blue-600 rounded-xl bg-blue-100 shadow-sm text-center">
             <p class="text-sm font-extrabold text-black uppercase">
-              Total Profit:
+              Total Worth:
               <span class="text-base font-bold">
-                {{ grandTotalProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) }} LKR
+                {{ totalProductWorth.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) }} LKR
               </span>
             </p>
           </div>
@@ -326,6 +335,7 @@
             <tr class="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 text-white text-[14px] border-b border-blue-800">
               <th class="p-3 text-left font-semibold">#</th>
               <th class="p-3 text-left font-semibold">Product</th>
+              <th class="p-3 text-center font-semibold">Stock Qty</th>
               <th class="p-3 text-center font-semibold">Sales Qty</th>
               <th class="p-3 text-center font-semibold">Total Sales Value (LKR)</th>
               <th class="p-3 text-center font-semibold">Price (LKR)</th>
@@ -336,9 +346,17 @@
           </thead>
 
           <tbody class="text-[12px] font-medium">
-            <tr v-for="(p, i) in products" :key="p.id ?? i" class="border-b transition duration-200 hover:bg-gray-100">
+            <tr v-if="filteredProducts.length === 0">
+              <td colspan="9" class="p-6 text-center text-gray-500 text-lg">
+                No products found matching "{{ productSearchQuery }}"
+              </td>
+            </tr>
+            <tr v-for="(p, i) in filteredProducts" :key="p.id ?? i" class="border-b transition duration-200 hover:bg-gray-100">
               <td class="p-3 text-center">{{ i + 1 }}</td>
               <td class="p-3 font-bold">{{ p.name || 'N/A' }}</td>
+              <td class="p-3 text-center font-semibold" :class="Number(p.stock_quantity || 0) > 0 ? 'text-green-600' : 'text-red-600'">
+                {{ Number(p.stock_quantity || 0) }}
+              </td>
               <td class="p-3 text-center">{{ Number(p.sales_qty || 0) }}</td>
               <td class="p-3 text-center">
                 {{ (Number(p.sales_qty || 0) * Number(p.selling_price || 0)).toFixed(2) }}
@@ -356,13 +374,14 @@
           <tfoot class="bg-gray-50 text-[12px] font-semibold">
             <tr>
               <td class="p-3 text-right" colspan="2">Totals:</td>
+              <td class="p-3 text-right">{{ totalStockQty.toLocaleString() }}</td>
               <td class="p-3 text-right">{{ totalSalesQty.toLocaleString() }}</td>
               <td class="p-3 text-right"></td>
               <td class="p-3 text-right"></td>
               <td class="p-3 text-right"></td>
               <td class="p-3 text-right"></td>
               <td class="p-3 text-right">
-                {{ grandTotalProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) }} LKR
+                {{ grandTotalProfit.toFixed(2) }} LKR
               </td>
             </tr>
           </tfoot>
@@ -387,7 +406,7 @@
             <p class="text-sm font-extrabold text-black uppercase">
               Total Expenses:
               <span class="text-base font-bold">
-                {{ totalExpenseAmount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) }} LKR
+                {{ totalExpenseAmount.toFixed(2) }} LKR
               </span>
             </p>
           </div>
@@ -433,7 +452,7 @@
             <tr>
               <td class="p-3 text-right" colspan="2">Total:</td>
               <td class="p-3 text-right">
-                {{ totalExpenseAmount.toLocaleString(undefined,{minimumFractionDigits:2}) }}
+                {{ totalExpenseAmount.toFixed(2) }}
               </td>
               <td class="p-3"></td>
             </tr>
@@ -678,6 +697,7 @@ const sales = ref(props.sales);
 const expenses = ref(props.expenses);
 const totalExpenseAmount = ref(props.totalExpenseAmount || 0);
 const totalExpenseCount = ref(props.totalExpenseCount || 0);
+const productSearchQuery = ref('');
 
 // In Cash State
 const showInCashModal = ref(false);
@@ -764,9 +784,24 @@ const priceAfterDiscount = (product) => {
 const profitPerUnit = (product) => priceAfterDiscount(product) - Number(product.cost_price || 0);
 const totalProfit = (product) => profitPerUnit(product) * Number(product.sales_qty || 0);
 
+// Filtered products based on search query
+const filteredProducts = computed(() => {
+  if (!productSearchQuery.value.trim()) {
+    return products.value;
+  }
+  const query = productSearchQuery.value.toLowerCase();
+  return products.value.filter(p => 
+    (p.name || '').toLowerCase().includes(query) ||
+    (p.barcode || '').toLowerCase().includes(query)
+  );
+});
+
 // Product table totals
-const totalSalesQty = computed(() => products.value.reduce((s, p) => s + Number(p.sales_qty || 0), 0));
-const grandTotalProfit = computed(() => products.value.reduce((s, p) => s + totalProfit(p), 0));
+const totalStockQty = computed(() => filteredProducts.value.reduce((s, p) => s + Number(p.stock_quantity || 0), 0));
+const totalSalesQty = computed(() => filteredProducts.value.reduce((s, p) => s + Number(p.sales_qty || 0), 0));
+const grandTotalProfit = computed(() => filteredProducts.value.reduce((s, p) => s + totalProfit(p), 0));
+const totalProductCount = computed(() => filteredProducts.value.length);
+const totalProductWorth = computed(() => filteredProducts.value.reduce((s, p) => s + (Number(p.stock_quantity || 0) * Number(p.selling_price || 0)), 0));
 
 // Date filter
 const filterData = () => {
