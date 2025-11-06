@@ -198,12 +198,7 @@
                         </span>
                       </p>
 
-                      <!-- Product Information -->
-                      <template v-if="!item.type || item.type === 'product'">
-                        <p class="text-sm text-gray-600">
-                          Stock: {{ item.stock_quantity || 0 }}  | Price: {{ item.cost_price || 0 }} LKR
-                        </p>
-                      </template>
+                     
 
                       <div class="flex items-center justify-between w-full">
                         <div class="flex items-center gap-2">
@@ -1118,7 +1113,7 @@ const addCustomProduct = () => {
     quantity: parseInt(customProduct.value.quantity),
     selling_price: parseFloat(customProduct.value.price),
     apply_discount: false,
-    include_custom: false, // NEW
+    include_custom: true, // DEFAULT CHECKED NOW
   };
 
   products.value.push(customItem);
@@ -1513,7 +1508,7 @@ const submitBarcode = async () => {
           ...fetchedProduct,
           quantity: 1,
           apply_discount: false,
-          include_custom: false, // NEW
+          include_custom: true, // DEFAULT CHECKED NOW
         });
       }
 
@@ -1555,7 +1550,7 @@ const selectBatch = (batch) => {
       ...batch,
       quantity: 1,
       apply_discount: false,
-      include_custom: false, // NEW
+      include_custom: true, // DEFAULT CHECKED NOW
     });
   }
 
@@ -1705,7 +1700,7 @@ const handleSelectedProducts = (selectedProducts) => {
         ...fetchedProduct,
         quantity: 1,
         apply_discount: false,
-        include_custom: false, // NEW
+        include_custom: true, // DEFAULT CHECKED NOW
       });
     }
   });
@@ -1843,7 +1838,7 @@ const fetchreturn = async () => {
           apply_discount: false,
           returnReason: product.pivot?.reason_id || null,
           pivot: product.pivot,
-          include_custom: false, // NEW default
+          include_custom: true, // DEFAULT CHECKED NOW FOR PAST ORDERS
         }));
       } else {
         products.value = [];
@@ -1913,7 +1908,7 @@ const handlePrintoutsSelected = (selectedPrintouts) => {
       quantity: parseInt(printout.quantity),
       selling_price: parseFloat(printout.price),
       apply_discount: false,
-      include_custom: false, // NEW
+      include_custom: true, // DEFAULT CHECKED NOW
     };
     products.value.push(printoutItem);
   });
