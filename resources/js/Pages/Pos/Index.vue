@@ -225,9 +225,13 @@
                     </div>
 
                     <div class="flex flex-col justify-between w-5/6 gap-2">
-                      <p class="text-xl text-gray-900 font-semibold">
-                        {{ item.name }}
-                      </p>
+                    <p class="flex justify-between items-center text-gray-900 font-semibold">
+  <span class="text-lg">{{ item.name }}</span>
+  <span class="text-lg text-blue-900 font-bolder">
+    {{ isWholesale ? Number(item.whole_price).toFixed(2) : Number(item.selling_price).toFixed(2) }} LKR
+  </span>
+</p>
+
                       <!-- Product Information -->
                       <template v-if="!item.type || item.type === 'product'">
                         <p class="text-sm text-gray-600">
@@ -296,7 +300,10 @@
                             </p>
 
                             <p class="text-xl font-bold text-gray-900 mt-1">
-                              {{ isWholesale ? Number(item.whole_price).toFixed(2) : Number(item.selling_price).toFixed(2) }} LKR
+                          
+
+
+                                  {{ ((isWholesale ? item.whole_price : item.selling_price) * item.quantity).toFixed(2) }} LKR
                             </p>
                           </div>
                         </div>
