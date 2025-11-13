@@ -1508,7 +1508,7 @@ const submitBarcode = async () => {
           ...fetchedProduct,
           quantity: 1,
           apply_discount: false,
-          include_custom: false, // DEFAULT CHECKED NOW
+          include_custom: true, // DEFAULT CHECKED NOW
         });
       }
 
