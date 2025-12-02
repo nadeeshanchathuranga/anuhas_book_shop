@@ -231,7 +231,7 @@ const handlePrintReceipt = () => {
               ${product.name}
               ${
                 product.include_custom
-                  ? `<span style="font-size: 8px; background:#4CAF50; color:white; padding:1px 4px; border-radius:3px; margin-left:4px;">%</span>`
+                  ? `<span style="font-size: 11px; background:#4CAF50; color:white; padding:1px 4px; border-radius:3px; margin-left:4px;">%</span>`
                   : ""
               }
             </td>
@@ -242,7 +242,7 @@ const handlePrintReceipt = () => {
               ${unitPrice.toFixed(2)} 
               ${
                 hasLineDiscount
-                  ? `<div style="font-weight: bold; font-size: 9px; background:black; color:white; text-align:center; margin-top:2px; border-radius:3px; display:inline-block; padding:0 4px;">
+                  ? `<div style="font-weight: bold; font-size: 11px; background:black; color:white; text-align:center; margin-top:2px; border-radius:3px; display:inline-block; padding:0 4px;">
                        ${discountPercent}% OFF
                      </div>`
                   : ""
@@ -261,10 +261,10 @@ const handlePrintReceipt = () => {
               ${
                 hasLineDiscount
                   ? `
-                    <div style="font-size: 10px; text-decoration: line-through;">
+                    <div style="font-size: 11px; text-decoration: line-through;">
                       ${originalLineTotal.toFixed(2)}
                     </div>
-                    <div style="font-size: 10px;">
+                    <div style="font-size: 11px;">
                       -${discountAmount.toFixed(2)}
                     </div>
                     <div style="font-weight: bold;">
@@ -284,7 +284,7 @@ const handlePrintReceipt = () => {
   // --- GENERATE DISCOUNTED & NON-DISCOUNTED PRODUCT TABLES ---
   const discountedRowsHTML = discountedProducts.length
     ? `<div class="section">
-         <div style="margin-bottom: 5px; font-size: 10px;">Discounted Items</div>
+         <div style="margin-bottom: 5px; font-size: 11px;">Discounted Items</div>
          <table>
            <thead>
              <tr>
@@ -329,20 +329,20 @@ const handlePrintReceipt = () => {
 <title>Receipt</title>
 <style>
   @media print { body { margin:0; padding:0; -webkit-print-color-adjust: none; background: white !important; } }
-  body { background: white; font-size: 9px; font-family: Arial, sans-serif; margin:0; padding:5px; color:#000; }
+  body { background: white; font-size: 11px; font-family: Arial, sans-serif; margin:0; padding:5px; color:#000; }
   .section { margin-bottom:8px; padding-top:3px; border-top:1px solid #000; }
-  .info-row { display:flex; justify-content:space-between; font-size:9px; margin-top:4px; }
-  .info-row p { margin:0; font-size:9px; }
-  .info-row small { font-weight:normal; font-size:8px; }
-  table { width:100%; font-size:8px; border-collapse:collapse; margin-top:4px; }
+  .info-row { display:flex; justify-content:space-between; font-size:11px; margin-top:4px; }
+  .info-row p { margin:0; font-size:11px; }
+  .info-row small { font-weight:normal; font-size:11px; }
+  table { width:100%; font-size:11px; border-collapse:collapse; margin-top:4px; }
   table th, table td { padding:3px 4px; }
   table th { text-align:left; }
   table td { text-align:right; }
   table td:first-child { text-align:left; }
-  .totals { border-top:1px solid #000; padding-top:4px; font-size:9px; }
+  .totals { border-top:1px solid #000; padding-top:4px; font-size:11px; }
   .totals div { display:flex; justify-content:space-between; margin-bottom:4px; }
-  .totals div:last-child { font-size:10px; font-weight:bold; }
-  .footer { text-align:center; font-size:8px; margin-top:8px; }
+  .totals div:last-child { font-size:11px; font-weight:bold; }
+  .footer { text-align:center; font-size:11px; margin-top:8px; }
   .header-line { border-bottom:1px solid #000; padding-bottom:5px; margin-bottom:5px; }
 </style>
 </head>
@@ -354,17 +354,17 @@ const handlePrintReceipt = () => {
         <div style="text-align:center; flex-grow:1; color:#000;">
           ${
             companyInfo?.value?.name
-              ? `<h1 style="margin:0; font-size:11px; font-weight:bold;">${companyInfo.value.name}</h1>`
+              ? `<h1 style="margin:0; font-size:15px; font-weight:bold;">${companyInfo.value.name}</h1>`
               : ""
           }
           ${
             companyInfo?.value?.address
-              ? `<p style="margin:1px 0; font-size:8px;">${companyInfo.value.address}</p>`
+              ? `<p style="margin:1px 0; font-size:11px;">${companyInfo.value.address}</p>`
               : ""
           }
           ${
             (companyInfo?.value?.phone || companyInfo?.value?.phone2 || companyInfo?.value?.email)
-              ? `<p style="margin:1px 0; font-size:8px;">
+              ? `<p style="margin:1px 0; font-size:11px;">
                    ${companyInfo.value.phone || ""}
                    ${companyInfo.value.phone2 ? " | " + companyInfo.value.phone2 : ""}
                    ${companyInfo.value.email ? " | " + companyInfo.value.email : ""}
@@ -373,7 +373,7 @@ const handlePrintReceipt = () => {
           }
           ${
             companyInfo?.value?.website
-              ? `<p style="margin:1px 0; font-size:8px;">${companyInfo.value.website}</p>`
+              ? `<p style="margin:1px 0; font-size:11px;">${companyInfo.value.website}</p>`
               : ""
           }
         </div>
@@ -409,7 +409,7 @@ const handlePrintReceipt = () => {
     </div>
 
     <!-- PRODUCT SECTIONS -->
-    <div style="margin-bottom: 5px;font-size: 10px;">
+    <div style="margin-bottom: 5px;font-size: 11px;">
       Total Products: ${totalProductCount}
     </div>
     ${discountedRowsHTML}
@@ -434,7 +434,7 @@ const handlePrintReceipt = () => {
       }
       ${
         customDiscountValue
-          ? `<div style="font-size:9px;">
+          ? `<div style="font-size:11px;">
                <span>Custom Discount</span>
                <span style="white-space:nowrap;">(${customDiscountValue.toFixed(2)} LKR)${
                  props.custom_discount_type === "percent"
