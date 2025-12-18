@@ -46,7 +46,11 @@ if (!\App\Models\User::where('email', 't1@cashier.com')->exists()) {
     ]);
 }
 
-
+        // Seed categories and products
+        $this->call([
+            CategorySeeder::class,
+            ProductSeeder::class,
+        ]);
  
     }
 }
