@@ -51,6 +51,6 @@ if (!\App\Models\User::where('email', 't1@cashier.com')->exists()) {
             CategorySeeder::class,
             ProductSeeder::class,
         ]);
- 
+
     }
 }
