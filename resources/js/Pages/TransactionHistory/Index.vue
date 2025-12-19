@@ -43,6 +43,7 @@
               <th class="p-4 font-semibold tracking-wide text-left uppercase">Action</th>
             </tr>
           </thead>
+
           <tbody class="text-[13px] font-normal">
             <tr
               v-for="(history, index) in allhistoryTransactions"
@@ -69,11 +70,7 @@
               <!-- Totals -->
               <td class="p-4 font-semibold border-gray-200 text-sm leading-5">
                 Base Total: {{ money(history.total_amount) }} LKR<br>
-                Custom discount:
-                {{ history.custom_discount_type === 'percent'
-                  ? money(history.custom_discount) + ' %'
-                  : money(history.custom_discount) + ' LKR' }}
-                <br />
+                
                 Final:
                 <span class="inline-block px-2 py-1 text-xs font-bold text-white bg-green-600 rounded">
                   {{ money(finalTotalForHistory(history)) }} LKR
@@ -120,7 +117,7 @@
 
               <!-- Sale date -->
               <td class="p-4 font-bold border-gray-200">
-                 {{ formatDateOnly(history.sale_date || history.created_at) }}
+                {{ formatDateOnly(history.sale_date || history.created_at) }}
               </td>
 
               <!-- Guide status -->
@@ -237,13 +234,6 @@ const props = defineProps({
 
 const form = useForm({});
 
-
-
-
-
-
-
-
 const formatDateOnly = (v) => {
   if (!v) return "N/A";
 
@@ -264,15 +254,6 @@ const formatDateOnly = (v) => {
     year: "numeric",
   }).format(d);
 };
-
-
-
-
-
-
-
-
-
 
 // ---------- helpers ----------
 const num = (v) => Number(v || 0);
@@ -395,300 +376,118 @@ const markGuideCompleted = async (saleId) => {
   }
 };
 
-// ---------- Receipt printing (matching POS Success Model structure) ----------
+// ---------- Receipt printing (POS-style, compact for thermal printers) ----------
 const printReceipt = (history) => {
   const company = props.companyInfo?.[0] || {};
   const items = history.sale_items || [];
 
-  // --- SPLIT PRODUCTS BY DISCOUNT ---
-  const discountedProducts = items.filter(it => {
-    const pct = Number(it.discount ?? it.discount_percent ?? 0);
-    return (it.apply_discount === true || it.apply_discount === 1 || it.apply_discount === "1") && pct > 0;
-  });
-  
-  const nonDiscountedProducts = items.filter(it => {
-    const pct = Number(it.discount ?? it.discount_percent ?? 0);
-    return !((it.apply_discount === true || it.apply_discount === 1 || it.apply_discount === "1") && pct > 0);
-  });
+  const totalProducts = items.reduce((s, it) => s + Number(it.quantity || 0), 0);
 
-  // --- HELPER FUNCTION TO GENERATE PRODUCT ROWS ---
-  const generateProductRows = (productsArray) => {
-    return productsArray.map((it) => {
-      const name = it?.product?.name || it?.custom_product?.name || it?.printout?.name || it?.name || "N/A";
-      const qty = Number(it.quantity || 0);
-      const unit = computePrice(it);
-      const pct = Number(it.discount ?? it.discount_percent ?? 0);
-      const hasDisc = (it.apply_discount === true || it.apply_discount === 1 || it.apply_discount === "1") && pct > 0;
+  const generateItemRows = (arr) =>
+    arr
+      .map((it) => {
+        const name = it?.product?.name || it?.custom_product?.name || it?.printout?.name || it?.name || "N/A";
+        const qty = Number(it.quantity || 0);
+        const unit = computePrice(it);
+        const line = unit * qty;
+        return `
+          <tr>
+            <td style="text-align:left; padding:2px 0; vertical-align:top;">${name}</td>
+            <td style="text-align:center; padding:2px 6px; vertical-align:top;">${qty}</td>
+            <td style="text-align:right; padding:2px 0; vertical-align:top;">${line.toFixed(2)}</td>
+          </tr>
+        `;
+      })
+      .join("");
 
-      // ORIGINAL (NO DISCOUNT) LINE TOTAL
-      const originalLineTotal = unit * qty;
-
-      // FINAL TOTAL AFTER DISCOUNT
-      let finalLineTotal = originalLineTotal;
-      if (hasDisc) {
-        finalLineTotal = unit * qty * (1 - pct / 100);
-      }
-
-      // DISCOUNT AMOUNT
-      const discountAmount = hasDisc ? originalLineTotal - finalLineTotal : 0;
-
-      return `
-        <tr>
-          <td colspan="3" style="padding: 4px 0;">
-            ${name}
-            ${
-              it.custom_product_id
-                ? `<span style="font-size: 8px; background:#4CAF50; color:white; padding:1px 4px; border-radius:3px; margin-left:4px;">%</span>`
-                : ""
-            }
-          </td>
-        </tr>
-        <tr>
-          <td></td>
-          <td style="text-align: center; padding: 2px 0;">
-            ${unit.toFixed(2)} 
-            ${
-              hasDisc
-                ? `<div style="font-weight: bold; font-size: 9px; background:black; color:white; text-align:center; margin-top:2px; border-radius:3px; display:inline-block; padding:0 4px;">
-                     ${pct}% OFF
-                   </div>`
-                : ""
-            }
-          </td>
-          <td style="text-align: center; padding: 2px 0;">
-            ${qty}
-          </td>
-          <td style="text-align: right; padding: 2px 0;">
-            ${
-              hasDisc
-                ? `
-                  <div style="font-size: 10px; text-decoration: line-through;">
-                    ${originalLineTotal.toFixed(2)}
-                  </div>
-                  <div style="font-size: 10px;">
-                    -${discountAmount.toFixed(2)}
-                  </div>
-                  <div style="font-weight: bold;">
-                    ${finalLineTotal.toFixed(2)}
-                  </div>
-                `
-                : `
-                  ${finalLineTotal.toFixed(2)}
-                `
-            }
-          </td>
-        </tr>
-      `;
-    }).join("");
-  };
-
-  // --- GENERATE DISCOUNTED & NON-DISCOUNTED PRODUCT TABLES ---
-  const discountedRowsHTML = discountedProducts.length
-    ? `<div class="section">
-         <div style="margin-bottom: 5px; font-size: 10px;">Discounted Items</div>
-         <table>
-           <thead>
-             <tr>
-               <th style="text-align:left; padding:4px;">Items</th>
-               <th style="text-align:center; padding:4px;">Price × Qty</th>
-               <th style="text-align:right; padding:4px;">Amount</th>
-             </tr>
-           </thead>
-           <tbody>
-             ${generateProductRows(discountedProducts)}
-           </tbody>
-         </table>
-       </div>`
-    : "";
-
-  const nonDiscountedRowsHTML = nonDiscountedProducts.length
-    ? `<div class="section">
-         <table>
-           <thead>
-             <tr>
-               <th style="text-align:left; padding:4px;">Items</th>
-               <th style="text-align:center; padding:4px;">Price</th>
-               <th style="text-align:center; padding:4px;">Qty</th>
-               <th style="text-align:right; padding:4px;">Amount</th>
-             </tr>
-           </thead>
-           <tbody>
-             ${generateProductRows(nonDiscountedProducts)}
-           </tbody>
-         </table>
-       </div>`
-    : "";
-
-  const gross = num(history.total_amount);
-  const discount = num(history.discount || 0);
+  const gross = num(history.total_amount || 0);
   const custom = num(history.custom_discount || 0);
   const customLkr = history.custom_discount_type === "percent" ? (gross * custom) / 100 : custom;
-  const finalTotal = gross - discount - customLkr;
-  const cash = num(history.cash);
+  const finalTotal = gross - num(history.discount || 0);
+  const cash = num(history.cash || 0);
   const balance = cash - finalTotal;
-  const totalProductCount = items.length;
 
-  const receipt = `
-<!DOCTYPE html>
-<html lang="en">
+  const receipt = `<!doctype html>
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Receipt</title>
-<style>
-  @media print { body { margin:0; padding:0; -webkit-print-color-adjust: none; background: white !important; } }
-  body { background: white; font-size: 9px; font-family: Arial, sans-serif; margin:0; padding:5px; color:#000; }
-  .section { margin-bottom:8px; padding-top:3px; border-top:1px solid #000; }
-  .info-row { display:flex; justify-content:space-between; font-size:9px; margin-top:4px; }
-  .info-row p { margin:0; font-size:9px; }
-  .info-row small { font-weight:normal; font-size:8px; }
-  table { width:100%; font-size:8px; border-collapse:collapse; margin-top:4px; }
-  table th, table td { padding:3px 4px; }
-  table th { text-align:left; }
-  table td { text-align:right; }
-  table td:first-child { text-align:left; }
-  .totals { border-top:1px solid #000; padding-top:4px; font-size:9px; }
-  .totals div { display:flex; justify-content:space-between; margin-bottom:4px; }
-  .totals div:last-child { font-size:10px; font-weight:bold; }
-  .footer { text-align:center; font-size:8px; margin-top:8px; }
-  .header-line { border-bottom:1px solid #000; padding-bottom:5px; margin-bottom:5px; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Receipt</title>
+  <style>
+    @page { size: 72mm auto; margin: 0; }
+    html,body { margin:0; padding:0; }
+    body { width:72mm; font-family: Arial, Helvetica, sans-serif; font-size:11px; color:#000; padding:6px; box-sizing:border-box; }
+    .center { text-align:center; }
+    .muted { color:#444; font-size:10px; }
+    .hr { border-bottom:1px dashed #000; margin:6px 0; }
+    .items table { width:100%; border-collapse:collapse; font-size:11px; }
+    .items td { padding:2px 0; }
+    .items td:nth-child(1) { text-align:left; }
+    .items td:nth-child(2) { text-align:center; width:28px; }
+    .items td:nth-child(3) { text-align:right; width:70px; }
+    .totals { margin-top:6px; font-size:12px; }
+    .totals .row { display:flex; justify-content:space-between; padding:3px 0; }
+    .totals .total { font-weight:700; font-size:13px; }
+    .footer { text-align:center; margin-top:8px; font-size:10px; }
+  </style>
 </head>
 <body>
-  <div class="receipt-container">
-    <!-- Header -->
-    <div class="header-line">
-      <div style="display:flex; justify-content:center; align-items:center;">
-        <div style="text-align:center; flex-grow:1; color:#000;">
-          ${
-            company.name
-              ? `<h1 style="margin:0; font-size:11px; font-weight:bold;">${company.name}</h1>`
-              : ""
-          }
-          ${
-            company.address
-              ? `<p style="margin:1px 0; font-size:8px;">${company.address}</p>`
-              : ""
-          }
-          ${
-            (company.phone || company.phone2 || company.email)
-              ? `<p style="margin:1px 0; font-size:8px;">
-                   ${company.phone || ""}
-                   ${company.phone2 ? " | " + company.phone2 : ""}
-                   ${company.email ? " | " + company.email : ""}
-                 </p>`
-              : ""
-          }
-          ${
-            company.website
-              ? `<p style="margin:1px 0; font-size:8px;">${company.website}</p>`
-              : ""
-          }
-        </div>
-      </div>
-    </div>
+  <div class="header center">
+    ${logoBase64.value ? `<img src="${logoBase64.value}" style="max-width:60px; display:block; margin:0 auto 4px;" />` : ""}
+    ${company.name ? `<div style="font-weight:700; font-size:13px;">${company.name}</div>` : ""}
+    ${company.address ? `<div class="muted">${company.address}</div>` : ""}
+    ${company.phone || company.phone2 ? `<div class="muted">${company.phone || ""}${company.phone2 ? ' | ' + company.phone2 : ''}</div>` : ""}
+  </div>
 
-    <div class="info-row">
-      <div>
-        <p>Date & Time:</p>
-        <small>${new Date(history.created_at || Date.now()).toLocaleDateString()} ${new Date(history.created_at || Date.now()).toLocaleTimeString()}</small>
-      </div>
-      <div>
-        <p>Order No:</p>
-        <small>${history.order_id || ""}</small>
-      </div>
+  <div style="margin-top:6px;">
+    <div style="display:flex; justify-content:space-between;">
+      <div class="muted">Date</div>
+      <div class="muted">${new Date(history.created_at || Date.now()).toLocaleString()}</div>
     </div>
-
-    <div class="info-row">
-      <div>
-        <p>Customer:</p>
-        <small>${history?.customer?.name || ""}</small>
-      </div>
-      <div>
-        <p>Cashier:</p>
-        <small>${history?.user?.name || ""}</small>
-      </div>
+    <div style="display:flex; justify-content:space-between;">
+      <div class="muted">Order</div>
+      <div class="muted">${history.order_id || ''}</div>
     </div>
-
-    <div class="info-row">
-      <p>Billing Type: <small>${Number(history.is_whole) > 0 ? "Wholesale" : "Retail"}</small></p>
-      ${history.payment_method ? `<p>Payment Method: <small>${history.payment_method.charAt(0).toUpperCase() + history.payment_method.slice(1)}</small></p>` : ""}
-      ${Number(history.credit_bill) ? `<p>Credit Bill: <small>Yes</small></p>` : ""}
-    </div>
-
-    <!-- PRODUCT SECTIONS -->
-    <div style="margin-bottom: 5px;font-size: 10px;">
-      Total Products: ${totalProductCount}
-    </div>
-    ${discountedRowsHTML}
-    ${nonDiscountedRowsHTML}
-
-    <!-- TOTALS -->
-    <div class="totals">
-      ${
-        gross
-          ? `<div><span>Sub Total</span><span>${gross.toFixed(2)} LKR</span></div>`
-          : ""
-      }
-      ${
-        discount
-          ? `<div><span>Discount</span><span>(${discount.toFixed(2)} LKR)</span></div>`
-          : ""
-      }
-      ${
-        customLkr > 0
-          ? `<div style="font-size:9px;">
-               <span>Custom Discount</span>
-               <span style="white-space:nowrap;">(${customLkr.toFixed(2)} LKR)${
-                 history.custom_discount_type === "percent"
-                   ? ` (${custom.toFixed(2)}%)`
-                   : ""
-               }</span>
-             </div>`
-          : ""
-      }
-      ${
-        finalTotal
-          ? `<div><span>Total</span><span>${finalTotal.toFixed(2)} LKR</span></div>`
-          : ""
-      }
-      ${
-        cash
-          ? `<div><span>Cash</span><span>${cash.toFixed(2)} LKR</span></div>`
-          : ""
-      }
-      ${
-        balance
-          ? `<div><span>Balance</span><span>${balance.toFixed(2)} LKR</span></div>`
-          : ""
-      }
-    </div>
-
-    <div class="footer">
-      <p>Items can be exchanged within seven (7) days of purchase. No cash refunds will be provided for issued items.</p>
-      <p>THANK YOU COME AGAIN</p>
-      <p>Powered by JAAN Network Ltd.</p>
+    <div style="display:flex; justify-content:space-between; margin-top:4px;">
+      <div class="muted">Customer</div>
+      <div class="muted">${history?.customer?.name || '---'}</div>
     </div>
   </div>
+
+  <div class="hr"></div>
+
+  <div class="items">
+    <table>
+      <tbody>
+        ${generateItemRows(items)}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="hr"></div>
+
+  <div class="totals">
+    ${gross ? `<div class="row"><div>Sub Total</div><div>${gross.toFixed(2)} LKR</div></div>` : ''}
+    
+    ${history.discount ? `<div class="row"><div>Discount</div><div>-${num(history.discount).toFixed(2)} LKR</div></div>` : ''}
+    ${finalTotal ? `<div class="row total"><div>Total</div><div>${finalTotal.toFixed(2)} LKR</div></div>` : ''}
+    ${cash ? `<div class="row"><div>Cash</div><div>${cash.toFixed(2)} LKR</div></div>` : ''}
+    ${balance ? `<div class="row"><div>Balance</div><div>${balance.toFixed(2)} LKR</div></div>` : ''}
+  </div>
+
+  <div class="footer">
+    <div style="font-size:10px;">Items can be exchanged within seven (7) days of purchase.</div>
+    <div style="font-weight:700; margin-top:6px;">THANK YOU COME AGAIN</div>
+  </div>
 </body>
-</html>
-`;
+</html>`;
 
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    alert("Failed to open print window. Please check your browser settings.");
-    return;
-  }
-
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) { alert('Failed to open print window. Please check your browser settings.'); return; }
   printWindow.document.open();
   printWindow.document.write(receipt);
   printWindow.document.close();
-
-  printWindow.onload = () => {
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
-  };
+  printWindow.onload = () => { printWindow.focus(); printWindow.print(); printWindow.close(); };
 };
 
 // ---------- credit payment modal ----------
