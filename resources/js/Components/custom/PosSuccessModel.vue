@@ -250,94 +250,25 @@ const handlePrintReceipt = () => {
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Receipt</title>
 <style>
-  @page { size: 58mm auto; margin: 0; }
-  @media print { 
-    body { margin:0; padding:0; -webkit-print-color-adjust: none; background: white !important; } 
-    @page { size: 58mm auto; margin: 0; }
-  }
-  body { 
-    background: white; 
-    font-size: 8px; 
-    font-family: 'Courier New', monospace; 
-    margin:0; 
-    padding:3px; 
-    color:#000; 
-    width: 58mm;
-    max-width: 58mm;
-    overflow: hidden;
-  }
-  .info-row { 
-    display:flex; 
-    justify-content:space-between; 
-    font-size:8px; 
-    margin:1px 0;
-    line-height: 1.2;
-  }
+  @media print { body { margin:0; padding:0; -webkit-print-color-adjust: none; background: white !important; } }
+  body { background: white; font-size: 11px; font-family: Arial, sans-serif; margin:0; padding:10px; color:#000; }
+  .info-row { display:flex; justify-content:space-between; font-size:11px; margin-top:2px; margin-bottom:2px; }
   .info-row span:first-child { font-weight: normal; }
   .info-row span:last-child { font-weight: normal; }
-  .dotted-line { 
-    border-bottom: 1px dashed #000; 
-    margin: 2px 0; 
-  }
-  table { 
-    width:100%; 
-    font-size:7px; 
-    border-collapse:collapse; 
-    margin:2px 0;
-  }
-  table th { 
-    padding:1px; 
-    text-align:left; 
-    font-weight:bold; 
-    font-size:7px;
-  }
-  table td { 
-    padding:1px; 
-    text-align:left; 
-    font-size:7px;
-    vertical-align: top;
-  }
-  table th:nth-child(1) { width: 60%; }
-  table th:nth-child(2) { width: 15%; text-align:center; }
-  table th:nth-child(3) { width: 25%; text-align:right; }
-  table td:nth-child(1) { width: 60%; }
-  table td:nth-child(2) { width: 15%; text-align:center; }
-  table td:nth-child(3) { width: 25%; text-align:right; }
-  .totals { 
-    font-size:8px; 
-    margin:2px 0;
-  }
-  .totals-row { 
-    display:flex; 
-    justify-content:space-between; 
-    margin:1px 0;
-    line-height: 1.2;
-  }
-  .totals-row.bold { 
-    font-weight:bold; 
-    font-size:9px;
-  }
-  .footer { 
-    text-align:center; 
-    font-size:7px; 
-    margin:3px 0;
-    line-height:1.3;
-  }
-  .header { 
-    text-align:center; 
-    margin:2px 0;
-  }
-  h1 { 
-    margin:0; 
-    font-size:10px; 
-    font-weight:bold; 
-    line-height: 1.1;
-  }
-  .company-info { 
-    font-size:7px; 
-    margin:1px 0; 
-    line-height: 1.2;
-  }
+  .dotted-line { border-bottom: 1px dotted #000; margin: 5px 0; }
+  table { width:100%; font-size:11px; border-collapse:collapse; margin-top:5px; margin-bottom:5px; }
+  table th { padding:5px 2px; text-align:left; font-weight:bold; border-bottom: 1px dotted #000; }
+  table td { padding:5px 2px; text-align:left; }
+  table th:nth-child(2), table td:nth-child(2) { text-align:right; }
+  table th:nth-child(3), table td:nth-child(3) { text-align:center; }
+  table th:nth-child(4), table td:nth-child(4) { text-align:right; }
+  .totals { border-top:1px dotted #000; padding-top:5px; font-size:11px; text-align:right; }
+  .totals-row { display:flex; justify-content:space-between; margin-bottom:2px; }
+  .totals-row.bold { font-weight:bold; }
+  .footer { text-align:center; font-size:11px; margin-top:8px; line-height:1.4; }
+  .header { text-align:center; padding-bottom:5px; margin-bottom:5px; border-bottom:1px dotted #000; }
+  h1 { margin:0; font-size:16px; font-weight:bold; }
+  .company-info { font-size:10px; margin:2px 0; }
 </style>
 </head>
 <body>
@@ -362,19 +293,16 @@ const handlePrintReceipt = () => {
     </div>
 
     <div class="info-row">
-      <span>Order: ${props.orderid}</span>
-      <span>${new Date().toLocaleDateString()}</span>
+      <span>Order No: ${props.orderid}</span>
+      <span>Cashier : ${props.cashier?.name || ""}</span>
     </div>
     
     <div class="info-row">
-      <span>Cashier: ${(props.cashier?.name || '').substring(0, 10)}</span>
-      <span>${props.isWholesale ? "Wholesale" : "Retail"}</span>
+      <span>Customer : ${props.customer?.name || "..........................."}</span>
+      <span>Billing Type : ${props.isWholesale ? "Wholesale" : "Retail"}</span>
     </div>
     
-    <div class="info-row">
-      <span>Customer: ${(props.customer?.name || "...").substring(0, 15)}</span>
-      <span>${props.paymentMethod ? props.paymentMethod.charAt(0).toUpperCase() + props.paymentMethod.slice(1) : ""}</span>
-    </div>
+    
     
     <div class="dotted-line"></div>
 
@@ -390,14 +318,18 @@ const handlePrintReceipt = () => {
       }
       ${
         customEligibleSubtotal
-          ? `<div class="totals-row"><span>Custom Sub</span><span>${customEligibleSubtotal.toFixed(2)}</span></div>`
+          ? `<div class="totals-row"><span>Custom Sub Total</span><span>${customEligibleSubtotal.toFixed(2)}</span></div>`
           : ""
       }
       ${
         customDiscountValue
           ? `<div class="totals-row">
-               <span>Custom Disc</span>
-               <span>-${customDiscountValue.toFixed(2)}</span>
+               <span>Custom Discount</span>
+               <span>${customDiscountValue.toFixed(2)} (${
+                 props.custom_discount_type === "percent"
+                   ? `${rawCustomValue.toFixed(0)}%`
+                   : ""
+               })</span>
              </div>`
           : ""
       }
@@ -421,16 +353,21 @@ const handlePrintReceipt = () => {
     <div class="dotted-line"></div>
     
     <div class="info-row">
-      <span>Products: ${totalProductCount}</span>
-      <span>${new Date().toLocaleTimeString().substring(0, 5)}</span>
+      <span>${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</span>
+      <span>${props.paymentMethod ? props.paymentMethod.charAt(0).toUpperCase() + props.paymentMethod.slice(1) : ""}</span>
+    </div>
+    
+    <div class="info-row">
+      <span>Total Products</span>
+      <span>${totalProductCount}</span>
     </div>
     
     <div class="dotted-line"></div>
 
     <div class="footer">
-      <div>Exchange within 7 days</div>
-      <div>No cash refunds</div>
-      <div style="margin-top:2px; font-weight:bold;">THANK YOU COME AGAIN</div>
+      <div>Items can be exchanged within seven(7) days of purchase.</div>
+      <div>No cash refunds will be provided for issued items.</div>
+      <div style="margin-top:8px; font-weight:bold; font-size:11px;">THANK YOU COME AGAIN</div>
     </div>
   </div>
 </body>
