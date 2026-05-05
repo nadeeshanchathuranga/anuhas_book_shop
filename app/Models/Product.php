@@ -7,6 +7,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 
+/**
+ * @property int $id
+ * @property string|null $name
+ * @property float|null $stock_quantity
+ * @property int|null $supplier_id
+ * @property \Illuminate\Support\Carbon|null $expire_date
+ * @property float|null $selling_price
+ * @property float|null $whole_price
+ * @property float|null $cost_price
+ */
 class Product extends Model
 {
     use HasFactory, GeneratesUniqueCode;

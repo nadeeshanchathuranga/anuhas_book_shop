@@ -5,6 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property float|null $total_amount
+ * @property float|null $paid_amount
+ * @property string|null $status
+ * @property string|null $payment_method
+ * @property \Illuminate\Support\Carbon|null $sale_date
+ */
 class CreditBill extends Model
 {
     use HasFactory;

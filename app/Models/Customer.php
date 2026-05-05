@@ -6,6 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 
+/**
+ * @property int $id
+ * @property string|null $name
+ * @property string|null $email
+ * @property string|null $phone
+ * @property string|null $address
+ */
 class Customer extends Model
 {
     use HasFactory;

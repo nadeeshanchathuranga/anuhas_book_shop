@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use App\Models\CreditBill;
 use App\Models\CreditBillPayment;
@@ -41,7 +42,7 @@ class CreditController extends Controller
                 // Recalculate paid_amount from payments to ensure accuracy
                 $totalPaid = (float) $bill->payments->sum('amount');
 
-                \Log::info('Processing bill', [
+                Log::info('Processing bill', [
                     'bill_id' => $bill->id,
                     'db_paid_amount' => $bill->paid_amount,
                     'calculated_paid_amount' => $totalPaid,
@@ -92,7 +93,7 @@ class CreditController extends Controller
         $customers = Customer::select('id', 'name')->orderBy('name')->get()->toArray();
 
         // Log the data being sent
-        \Log::info('Sending credit bills:', ['data' => $creditBills]);
+        Log::info('Sending credit bills:', ['data' => $creditBills]);
 
         return Inertia::render('CreditPayment/Index', [
             'creditBills' => $creditBills,
@@ -105,7 +106,7 @@ class CreditController extends Controller
      */
     public function store(Request $request)
     {
-        \Log::info('Payment submission received', ['data' => $request->all()]);
+        Log::info('Payment submission received', ['data' => $request->all()]);
 
         $validated = $request->validate([
             'credit_bill_id' => 'required|exists:credit_bills,id',
