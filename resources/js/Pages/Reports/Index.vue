@@ -858,6 +858,17 @@ const filterData = () => {
 const sortDescending = (data) =>
   Object.entries(data).sort((a, b) => b[1] - a[1]).reduce((acc, [k, v]) => ((acc[k] = v), acc), {});
 
+const normalizePaymentMethod = (method) => {
+  if (!method) return 'Unknown';
+  const value = String(method).toLowerCase();
+  if (value === 'cash') return 'Cash';
+  if (value === 'card') return 'Card';
+  if (value === 'online') return 'Online';
+  if (value === 'cheque') return 'Cheque';
+  if (value === 'credit') return 'Credit';
+  return value.charAt(0).toUpperCase() + value.slice(1);
+};
+
 const productQuantities = computed(() => {
   const quantities = {};
   props.sales.forEach((sale) => {
@@ -879,9 +890,19 @@ const chartOptions = { responsive: true, plugins: { legend: { display: true, pos
 const paymentMethodTotals = computed(() => {
   const totals = {};
   props.sales.forEach((s) => {
-    const m = s.payment_method;
-    totals[m] = (totals[m] || 0) + parseFloat(s.total_amount);
+    const m = normalizePaymentMethod(s.payment_method);
+    totals[m] = (totals[m] || 0) + Number(s.total_amount || 0);
   });
+
+  if (Array.isArray(props.creditBills)) {
+    props.creditBills.forEach((bill) => {
+      if (!Array.isArray(bill.payments)) return;
+      bill.payments.forEach((payment) => {
+        const m = normalizePaymentMethod(payment.payment_method);
+        totals[m] = (totals[m] || 0) + Number(payment.amount || 0);
+      });
+    });
+  }
   return sortDescending(totals);
 });
 const chartData1 = computed(() => ({

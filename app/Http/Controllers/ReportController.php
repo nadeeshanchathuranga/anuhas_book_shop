@@ -6,12 +6,10 @@ use Carbon\Carbon;
 use App\Models\Product;
 use App\Models\Report;
 use App\Models\Sale;
-use App\Models\CreditBill;
 use App\Models\ExpenseNew;
 use App\Models\SaleItem;
 use App\Models\StockTransaction;
 use App\Models\InCash;
-use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -140,15 +138,17 @@ class ReportController extends Controller
         }
 
         // Payment totals - for regular sales use full amount, for credit bills use paid amount only
-        $paymentMethodTotals = $sales->groupBy('payment_method')->map(
-            fn($g) => (float) $g->sum('total_amount')
-        )->toArray();
+        $paymentMethodTotals = [];
+        foreach ($sales as $sale) {
+            $method = $this->normalizePaymentMethod($sale->payment_method);
+            $paymentMethodTotals[$method] = ($paymentMethodTotals[$method] ?? 0) + (float) $sale->total_amount;
+        }
 
         // Add credit bill payments to payment method totals
-        // Use actual payment methods from the filtered payments
+        // Use actual payment methods from the filtered payments and normalize labels
         foreach ($creditBills as $cb) {
             foreach ($cb->payments as $payment) {
-                $method = $payment->payment_method;
+                $method = $this->normalizePaymentMethod($payment->payment_method);
                 $paymentMethodTotals[$method] = ($paymentMethodTotals[$method] ?? 0) + (float) $payment->amount;
             }
         }
@@ -267,6 +267,19 @@ class ReportController extends Controller
 
             'stockTransactionsReturn'   => $stockTransactionsReturn,
         ]);
+    }
+
+    private function normalizePaymentMethod($paymentMethod)
+    {
+        $method = trim(strtolower((string) $paymentMethod));
+        return match ($method) {
+            'cash' => 'Cash',
+            'card' => 'Card',
+            'online' => 'Online',
+            'cheque' => 'Cheque',
+            'credit' => 'Credit',
+            default => ucfirst($method ?: 'Unknown'),
+        };
     }
 
     public function searchByCode(Request $request)
