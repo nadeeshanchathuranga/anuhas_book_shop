@@ -516,11 +516,15 @@ public function submit(Request $request)
 
             // If there's an initial payment, create a payment record
             if ($cashPaid > 0) {
+                $initialPaymentMethod = $validated['paymentMethod'] ?? 'cash';
+                if ($initialPaymentMethod === 'credit') {
+                    $initialPaymentMethod = 'cash';
+                }
                 \App\Models\CreditBillPayment::create([
                     'credit_bill_id' => $bill->id,
                     'customer_id' => $customer?->id,
                     'amount' => $cashPaid,
-                    'payment_method' => 'cash',
+                    'payment_method' => $initialPaymentMethod,
                     'description' => 'Initial payment at order creation',
                 ]);
             }
