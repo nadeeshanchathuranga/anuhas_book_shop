@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\CompanyInfo;
 use App\Models\StockTransaction;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
 
 class TransactionHistoryController extends Controller
 {
@@ -33,7 +34,12 @@ public function destroy(Request $request)
 {
     $request->validate([
         'order_id' => 'required|string|exists:sales,order_id',
+        'password' => 'required|string',
     ]);
+
+    if (!Hash::check($request->password, auth()->user()->password)) {
+        return back()->withErrors(['password' => 'Incorrect password. Please try again.']);
+    }
 
     $sale = Sale::where('order_id', $request->order_id)->first();
 

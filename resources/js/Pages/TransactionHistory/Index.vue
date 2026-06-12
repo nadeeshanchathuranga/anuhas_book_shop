@@ -173,6 +173,55 @@
 
   <Footer />
 
+  <!-- Delete Password Confirmation Modal -->
+  <TransitionRoot as="template" :show="showDeleteModal">
+    <Dialog class="relative z-50" :open="showDeleteModal" @close="closeDeleteModal">
+      <TransitionChild as="template" enter="ease-out duration-200" enter-from="opacity-0" enter-to="opacity-100"
+        leave="ease-in duration-150" leave-from="opacity-100" leave-to="opacity-0">
+        <div class="fixed inset-0 bg-black/50" />
+      </TransitionChild>
+
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <TransitionChild as="template" enter="ease-out duration-200" enter-from="opacity-0 scale-95"
+          enter-to="opacity-100 scale-100" leave="ease-in duration-150" leave-from="opacity-100 scale-100"
+          leave-to="opacity-0 scale-95">
+          <DialogPanel class="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl">
+            <DialogTitle class="text-xl font-bold text-gray-900">Confirm Deletion</DialogTitle>
+
+            <p class="mt-2 text-sm text-gray-600">
+              This action cannot be undone. Enter your admin password to permanently delete this bill.
+            </p>
+
+            <div class="mt-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Admin Password</label>
+              <input
+                v-model="deletePassword"
+                type="password"
+                placeholder="Enter your password"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+                @keyup.enter="confirmDelete"
+              />
+              <p v-if="deletePasswordError" class="mt-1 text-sm text-red-600">{{ deletePasswordError }}</p>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-6">
+              <button @click="closeDeleteModal" class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500">
+                Cancel
+              </button>
+              <button
+                @click="confirmDelete"
+                :disabled="deleteSubmitting"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60"
+              >
+                {{ deleteSubmitting ? 'Deleting…' : 'Delete' }}
+              </button>
+            </div>
+          </DialogPanel>
+        </TransitionChild>
+      </div>
+    </Dialog>
+  </TransitionRoot>
+
   <!-- Credit Payment Modal -->
   <TransitionRoot as="template" :show="showPaymentModal">
     <Dialog class="relative z-50" :open="showPaymentModal" @close="closePaymentModal">
@@ -337,19 +386,49 @@ onBeforeUnmount(() => {
   }
 });
 
-// ---------- actions ----------
+// ---------- delete with password modal ----------
+const showDeleteModal = ref(false);
+const deleteOrderId = ref(null);
+const deletePassword = ref("");
+const deletePasswordError = ref("");
+const deleteSubmitting = ref(false);
+
 const deleteReceipt = (orderId) => {
   if (!orderId) return alert("Invalid Order ID");
-  if (confirm("Delete this record? This action cannot be undone.")) {
-    router.post(route("transactions.delete"), { order_id: orderId }, {
-      onError: (error) => {
-        alert("Error: " + (error?.message || "Something went wrong."));
+  deleteOrderId.value = orderId;
+  deletePassword.value = "";
+  deletePasswordError.value = "";
+  showDeleteModal.value = true;
+};
+
+const closeDeleteModal = () => {
+  showDeleteModal.value = false;
+  deleteOrderId.value = null;
+  deletePassword.value = "";
+  deletePasswordError.value = "";
+};
+
+const confirmDelete = () => {
+  if (!deletePassword.value) {
+    deletePasswordError.value = "Password is required.";
+    return;
+  }
+  deleteSubmitting.value = true;
+  router.post(
+    route("transactions.delete"),
+    { order_id: deleteOrderId.value, password: deletePassword.value },
+    {
+      onError: (errors) => {
+        deletePasswordError.value = errors.password || "Something went wrong.";
+        deleteSubmitting.value = false;
       },
       onSuccess: () => {
+        closeDeleteModal();
+        deleteSubmitting.value = false;
         router.reload({ only: ["allhistoryTransactions", "totalhistoryTransactions"] });
       },
-    });
-  }
+    }
+  );
 };
 
 const markChequeAsPaid = (chequeId) => {
